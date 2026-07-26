@@ -1,0 +1,873 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Wallet, ArrowUpRight, Shield, Headphones, Award, Smartphone, 
+  User, Home, Layers, DollarSign, Bell, CheckCircle, AlertTriangle, 
+  Upload, ChevronRight, Copy, ExternalLink, RefreshCw, Send, Lock, Eye, EyeOff, Check, X, Sparkles, PartyPopper, Settings, HelpCircle,
+  SendHorizontal, PhoneCall, Wifi, Receipt, Dices, Zap, Tv
+} from 'lucide-react';
+
+export default function App() {
+  const [currentScreen, setCurrentScreen] = useState('home'); // home, register, dashboard, upgrade, withdraw, addBank, promotion, tiktokPromo, youtubePromo, telegramPromo, otherPromo, profile
+  const [balance, setBalance] = useState(789000);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authTab, setAuthTab] = useState('signup');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [hideBalance, setHideBalance] = useState(false);
+  const [profilePic, setProfilePic] = useState(null);
+  
+  const [formData, setFormData] = useState({
+    fullName: '',
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  
+  // Bank state
+  const [banks, setBanks] = useState([]);
+  const [newBank, setNewBank] = useState({ accountNumber: '', bankName: 'Access Bank', accountName: '' });
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [bankVerified, setBankVerified] = useState(false);
+
+  // Promotion state
+  const [promoUrl, setPromoUrl] = useState('');
+  const [promoAmount, setPromoAmount] = useState(1000);
+  const [promoOption, setPromoOption] = useState('followers');
+  const [otherPromoDesc, setOtherPromoDesc] = useState('');
+
+  // Withdrawal state
+  const [withdrawStep, setWithdrawStep] = useState('form');
+  const [withdrawData, setWithdrawData] = useState({ name: 'Florence', number: '', bank: 'Access Bank', amount: '' });
+  const [countdown, setCountdown] = useState(5);
+
+  // Upgrade state
+  const [upgradeStep, setUpgradeStep] = useState('form');
+  const [upgradeCountdown, setUpgradeCountdown] = useState(10);
+  const [upgradeAmount, setUpgradeAmount] = useState(11000);
+
+  // Unlimited dynamic live notifications generator using the exact provided names list
+  const [currentNotification, setCurrentNotification] = useState(null);
+  const [showNotification, setShowNotification] = useState(false);
+
+  const exactNamesList = [
+    "Andrew Taylor", "Kimberly Anderson", "Margaret Garcia", "Nancy Lopez", "Joseph Taylor", "Joseph Miller", "Karen Martinez", "Matthew Jackson", "Steven Hernandez", "Daniel Rodriguez", "Sandra Martin", "Anthony Davis", "Paul Jones", "Sarah Williams", "Jennifer Rodriguez", "Mark Garcia", "Joshua Williams", "Michelle Taylor", "Nancy Brown", "Matthew Brown", "Robert Davis", "Michael Williams", "James Jackson", "Lisa Hernandez", "Karen Martinez", "Matthew Davis", "Kimberly Thomas", "Andrew Anderson", "Linda Smith", "Linda Gonzalez", "Ashley Davis", "Richard Smith", "Nancy Jones", "Steven Thomas", "James Jackson", "Elizabeth Miller", "Elizabeth Brown", "Jennifer Jackson", "James Gonzalez", "Sarah Gonzalez", "Jessica Taylor", "Jennifer Rodriguez", "Daniel Smith", "Michelle Martinez", "David Jones", "Paul Williams", "Margaret Gonzalez", "Patricia Gonzalez", "Betty Taylor", "Michelle Lopez", "Richard Williams", "Mary Anderson", "John Jackson", "Mary Garcia", "Elizabeth Jones", "James Moore", "John Davis", "Jennifer Thomas", "Christopher Martin", "Andrew Davis", "Margaret Martin", "Elizabeth Anderson", "Ashley Davis", "Lisa Wilson", "Elizabeth Lopez", "Linda Williams", "Donald Williams", "Susan Garcia", "Emily Taylor", "Elizabeth Martin", "Elizabeth Williams", "Elizabeth Jackson", "Sandra Thomas", "Margaret Garcia", "Sarah Jackson", "Richard Smith", "James Moore", "Elizabeth Garcia", "Donald Jones", "Barbara Garcia", "Jessica Johnson", "Linda Miller", "David Hernandez", "Thomas Taylor", "Emily Garcia", "Donald Lopez", "Steven Taylor", "Karen Brown", "Christopher Jackson", "Sarah Taylor", "Sandra Williams", "Patricia Anderson", "William Martinez", "Jessica Thomas", "Barbara Lopez", "Michelle Martin", "Mary Williams", "Sarah Lopez", "Elizabeth Lopez", "Paul Hernandez", "Emily Anderson", "James Smith", "Joseph Brown", "Sarah Johnson", "Patricia Thomas", "Andrew Hernandez", "Michelle Anderson", "Matthew Jones", "Sandra Garcia", "Mary Taylor", "Sarah Johnson", "Joseph Wilson", "Charles Martinez", "Jennifer Williams", "Donna Thomas", "Ashley Wilson", "Christopher Jones", "Joshua Lopez", "Kimberly Taylor", "Charles Gonzalez", "Linda Hernandez", "John Taylor", "Thomas Hernandez", "David Garcia", "Matthew Miller", "Nancy Martinez", "Jessica Martinez", "John Miller", "Jennifer Jackson", "Patricia Taylor", "Susan Jackson", "Joshua Brown", "Mark Garcia", "Thomas Lopez", "Elizabeth Thomas", "William Johnson", "Matthew Hernandez", "Charles Anderson", "Mark Jones", "Margaret Jones", "Patricia Rodriguez", "Betty Gonzalez", "James Gonzalez", "Kimberly Jackson", "Anthony Johnson", "Robert Hernandez", "Steven Taylor", "Barbara Williams", "Steven Anderson", "Steven Martin", "Matthew Taylor", "Sarah Williams", "Nancy Martinez", "Nancy Johnson", "Ashley Miller", "Richard Smith", "Donald Wilson", "Steven Thomas", "Lisa Miller", "Andrew Jackson", "Mark Martin", "Joshua Jones", "Linda Johnson", "Jessica Rodriguez", "Richard Johnson", "Anthony Brown", "Karen Gonzalez", "Paul Taylor", "Sarah Anderson", "Jessica Lopez", "Donna Davis", "Patricia Moore", "Paul Martinez", "Jennifer Anderson", "John Taylor", "Steven Williams", "Paul Martinez", "Jennifer Jackson", "James Wilson", "Lisa Jackson", "John Johnson", "Nancy Brown", "William Garcia", "William Taylor", "Patricia Thomas", "Daniel Miller", "Nancy Martin", "Jennifer Taylor", "Steven Hernandez", "James Johnson", "Christopher Williams", "Steven Johnson", "Andrew Davis", "Donald Brown", "William Johnson", "Christopher Thomas", "Nancy Gonzalez", "Nancy Jackson", "Joseph Martin", "Joseph Smith", "Andrew Moore", "Margaret Rodriguez", "Jessica Davis", "Christopher Martin", "Jessica Martinez", "Nancy Davis", "Anthony Johnson", "Barbara Wilson", "Michael Moore", "Sandra Johnson", "Kimberly Lopez", "William Miller", "Susan Hernandez", "Susan Gonzalez", "Ashley Martinez", "Linda Brown", "Karen Anderson", "Daniel Wilson", "Thomas Gonzalez", "Emily Brown", "James Taylor", "Richard Gonzalez", "Lisa Hernandez", "Susan Smith", "James Jones", "Betty Jackson", "Robert Brown", "Barbara Gonzalez", "Joshua Moore", "Kimberly Moore", "Karen Martinez", "Michael Gonzalez", "Mary Hernandez", "Andrew Wilson", "Ashley Hernandez", "Jessica Jones", "Jessica Williams", "Joseph Johnson", "Elizabeth Jones", "Robert Jones", "Lisa Brown", "Sarah Williams", "James Moore", "Lisa Johnson", "Nancy Moore", "Michael Hernandez", "Christopher Gonzalez", "Elizabeth Brown", "Charles Hernandez", "Anthony Smith", "Jessica Wilson", "Thomas Martinez", "Barbara Gonzalez", "Steven Rodriguez", "Charles Miller", "Karen Thomas", "Susan Williams", "Karen Jackson", "Joshua Hernandez", "Elizabeth Anderson", "Ashley Taylor", "Michelle Brown", "Steven Martin", "Richard Jones", "Nancy Thomas", "Sarah Davis", "John Moore", "Paul Jones", "Sarah Moore", "Anthony Lopez", "Mark Gonzalez", "Matthew Wilson", "Emily Gonzalez", "Susan Gonzalez", "Patricia Rodriguez", "Daniel Miller", "Ashley Wilson", "Mark Johnson", "Steven Hernandez", "Mary Smith", "Nancy Jackson", "Thomas Jones", "Michael Gonzalez", "Matthew Martin", "Daniel Hernandez", "Margaret Lopez", "Linda Davis", "Michelle Garcia", "Betty Johnson", "Jennifer Gonzalez", "Nancy Lopez", "Richard Williams", "John Jackson", "Christopher Garcia", "Donna Martinez", "Donna Johnson", "Margaret Thomas", "Emily Smith", "Nancy Rodriguez", "Michael Moore", "Joshua Anderson", "Karen Anderson", "Jennifer Martinez", "James Martinez", "Karen Lopez", "Emily Hernandez", "William Wilson", "Barbara Williams", "Patricia Wilson", "Anthony Gonzalez", "Patricia Williams", "John Martin", "Andrew Taylor", "Patricia Miller", "Kimberly Moore", "Susan Jones", "James Davis", "Barbara Rodriguez", "Donna Anderson", "Paul Johnson", "William Martin", "Sarah Wilson", "Michelle Brown", "Mark Miller", "Mary Taylor", "Ashley Garcia", "Sandra Lopez", "Betty Gonzalez", "Michael Anderson", "Christopher Rodriguez", "William Miller", "Sandra Miller", "Betty Hernandez", "David Thomas", "Michelle Hernandez", "Charles Hernandez", "Andrew Davis", "Joseph Taylor", "Matthew Gonzalez", "Richard Jones", "Mark Martinez", "Nancy Williams", "Sandra Jackson", "Linda Jones", "Donna Gonzalez", "Lisa Moore", "Linda Brown", "John Gonzalez", "Paul Lopez", "Mary Jackson", "Daniel Martin", "Nancy Smith", "Mary Davis", "Karen Thomas", "Nancy Brown", "Lisa Martin", "Donald Moore", "James Wilson", "Joseph Rodriguez", "James Rodriguez", "Joshua Anderson", "Joshua Garcia", "Nancy Martin", "Linda Davis", "Michelle Jones", "Charles Jones", "Susan Gonzalez", "Donald Wilson", "Joseph Lopez", "Andrew Brown", "Emily Miller", "Emily Lopez", "Patricia Martinez", "Sandra Johnson", "Anthony Miller", "Kimberly Martin", "Donna Martinez", "Barbara Davis", "Mary Moore", "Barbara Martinez", "Daniel Garcia", "Susan Garcia", "Joshua Williams", "Ashley Taylor", "Christopher Miller", "Betty Miller", "Anthony Brown", "Patricia Smith", "Matthew Williams", "Jessica Davis", "Betty Davis", "Christopher Garcia", "Charles Miller", "Lisa Martinez", "Sandra Smith", "Steven Thomas", "Ashley Miller", "Margaret Davis", "Sarah Hernandez", "Michael Smith", "Richard Wilson", "Robert Wilson", "Nancy Martin", "Susan Thomas", "Patricia Moore", "William Williams", "Jennifer Rodriguez", "Anthony Martin", "Michelle Garcia", "Jennifer Jackson", "Michelle Jackson", "Sarah Miller", "Donald Martinez", "Thomas Martin", "David Williams", "Nancy Martin", "Andrew Martinez", "Susan Moore", "Betty Brown", "Andrew Moore", "Matthew Jackson", "Robert Martin", "Matthew Gonzalez", "Matthew Brown", "William Gonzalez", "David Williams", "Kimberly Davis", "Linda Jackson", "Jessica Jackson", "Christopher Gonzalez", "David Gonzalez", "Robert Rodriguez", "Mark Williams", "Charles Williams", "Susan Martin", "Elizabeth Moore", "Betty Hernandez", "Emily Anderson", "Thomas Lopez", "Sandra Davis", "William Hernandez", "Sandra Moore", "Barbara Anderson", "John Garcia", "Michael Moore", "Richard Wilson", "Robert Jackson", "Richard Johnson", "Linda Martin", "Robert Hernandez", "Susan Garcia", "Betty Anderson", "Linda Brown", "Margaret Brown", "Joseph Garcia", "Jessica Taylor", "Patricia Thomas", "Elizabeth Lopez", "Kimberly Davis", "Nancy Garcia", "Karen Thomas", "Steven Hernandez", "Donald Hernandez", "Mark Davis", "Robert Martinez", "Richard Thomas", "James Hernandez", "Ashley Wilson", "Paul Jackson", "Kimberly Williams", "Jessica Jones", "Margaret Smith", "Richard Gonzalez", "Sarah Wilson", "Richard Williams", "Nancy Martinez", "Betty Miller", "Robert Brown", "Michelle Martinez", "Linda Gonzalez", "Michelle Taylor", "Mary Williams", "Sandra Taylor", "Lisa Rodriguez", "Christopher Brown", "Donna Anderson", "Richard Miller", "Donald Anderson", "Sarah Wilson", "Michael Wilson", "Linda Martin", "Steven Williams", "Kimberly Williams", "William Martinez", "William Jones", "Anthony Smith", "Robert Johnson", "Karen Garcia", "Daniel Rodriguez", "Elizabeth Rodriguez", "Betty Gonzalez", "Charles Johnson", "Lisa Garcia", "Donald Taylor", "Karen Johnson", "Robert Martinez", "Paul Williams", "Sandra Johnson", "Emily Martinez", "Linda Smith", "Jessica Jackson", "Nancy Martin", "Betty Garcia", "Elizabeth Smith", "Nancy Taylor", "Emily Thomas", "Lisa Moore", "Thomas Martin", "Sandra Smith", "Jennifer Thomas", "Michael Johnson", "Matthew Brown", "Donald Thomas", "Betty Miller", "Matthew Johnson", "Patricia Taylor", "Charles Brown", "Susan Martin", "Joshua Hernandez", "Sarah Smith", "Kimberly Jackson", "Nancy Lopez", "Matthew Hernandez", "Karen Thomas", "Ashley Martin", "Mark Moore", "Elizabeth Jackson", "Linda Brown", "Paul Jones", "Emily Davis", "Betty Williams", "Susan Moore", "Susan Brown", "Nancy Wilson", "Barbara Gonzalez", "Susan Rodriguez", "Steven Jones", "Joshua Brown", "Kimberly Brown", "Linda Jones", "Margaret Garcia", "Emily Moore", "William Gonzalez", "Elizabeth Davis", "Jennifer Brown", "Joseph Gonzalez", "Richard Wilson", "Betty Lopez", "Elizabeth Jones", "Donna Taylor", "Donna Martin", "Joseph Hernandez", "Karen Gonzalez", "Joshua Johnson", "Lisa Martin", "Mary Anderson", "Anthony Thomas", "Mary Jackson", "Ashley Jones", "William Anderson", "David Anderson", "Lisa Garcia", "Charles Martin", "Donald Rodriguez", "Robert Jackson", "Sarah Hernandez", "Barbara Gonzalez", "John Martinez", "David Hernandez", "Robert Jones", "Christopher Garcia", "Nancy Gonzalez", "Michael Hernandez", "Ashley Wilson", "Sarah Anderson", "William Miller", "Elizabeth Lopez", "Ashley Davis", "Jessica Miller", "Matthew Garcia", "Thomas Jones", "Jennifer Thomas", "Lisa Martinez", "Sarah Williams", "Patricia Taylor", "Susan Hernandez", "James Brown", "Steven Taylor", "Betty Smith", "Sarah Smith", "Linda Martinez", "Christopher Brown", "Lisa Martin", "John Jones", "Karen Anderson", "Anthony Hernandez", "Christopher Martinez", "Patricia Garcia", "Emily Anderson", "Sarah Hernandez", "Betty Anderson", "Lisa Brown", "Mary Smith", "Mark Thomas", "Andrew Johnson", "Paul Jones", "John Rodriguez", "Andrew Anderson", "Sandra Wilson", "Lisa Thomas", "Elizabeth Rodriguez", "John Johnson", "Elizabeth Lopez", "Joshua Jones", "James Taylor", "Richard Davis", "Richard Wilson", "Jennifer Taylor", "Steven Davis", "Susan Smith", "Karen Garcia", "Ashley Lopez", "Kimberly Johnson", "Elizabeth Williams", "Paul Williams", "Daniel Thomas", "Karen Moore", "Nancy Wilson", "Richard Miller", "Kimberly Taylor", "Margaret Lopez", "Karen Johnson", "Sandra Davis", "Barbara Thomas", "Patricia Smith", "Daniel Davis", "Nancy Davis", "Charles Rodriguez", "Anthony Brown", "Thomas Smith", "Donna Thomas", "Sandra Martin", "Karen Jones", "Ashley Taylor", "Sandra Taylor", "Sarah Taylor", "Jessica Garcia", "Karen Smith", "Jessica Taylor", "Anthony Smith", "Matthew Wilson", "Mary Davis", "Ashley Wilson", "Christopher Williams", "Joshua Hernandez", "Joseph Wilson", "Sarah Martin", "Donald Smith", "Andrew Rodriguez", "Ashley Jones", "Ashley Thomas", "Matthew Jones", "Donna Hernandez", "Robert Hernandez", "Betty Thomas", "Lisa Davis", "Mark Johnson", "Ashley Garcia", "Patricia Brown", "David Martin", "Emily Taylor", "Joshua Johnson", "Jennifer Anderson", "Robert Rodriguez", "Nancy Gonzalez", "Kimberly Smith", "Sarah Jones", "Joseph Martin", "Christopher Thomas", "Linda Williams", "Margaret Thomas", "Margaret Moore", "Joshua Hernandez", "Patricia Smith", "Karen Lopez", "Mary Martin", "Andrew Moore", "Joseph Johnson", "Karen Jackson", "Daniel Rodriguez", "Karen Brown", "Betty Lopez", "Susan Wilson", "Anthony Martin", "Richard Jones", "Lisa Lopez", "Charles Wilson", "Richard Johnson", "Kimberly Gonzalez", "Thomas Williams", "Patricia Anderson", "Andrew Thomas", "Joshua Thomas", "William Jackson", "Thomas Brown", "Margaret Davis", "Steven Williams", "Andrew Brown", "Patricia Johnson", "Mark Brown", "Daniel Johnson", "Michelle Thomas", "Jessica Moore", "Ashley Davis", "Steven Jackson", "Susan Gonzalez", "Steven Moore", "David Martinez", "Michelle Taylor", "Paul Taylor", "John Gonzalez", "Richard Moore", "Elizabeth Johnson", "John Miller", "Joshua Brown", "Nancy Wilson", "Sandra Davis", "Patricia Smith", "Linda Williams", "Lisa Martinez", "Kimberly Moore", "Paul Gonzalez", "Patricia Williams", "Richard Thomas", "Paul Lopez", "Patricia Jones", "Ashley Davis", "Christopher Brown", "Donna Smith", "Elizabeth Moore", "Susan Davis", "Sandra Jackson", "Patricia Anderson", "Betty Thomas", "William Taylor", "Susan Brown", "Margaret Garcia", "Karen Garcia", "Jennifer Gonzalez", "William Martin", "Jennifer Martinez", "Christopher Smith", "Charles Lopez", "Karen Miller", "Sarah Miller", "Daniel Brown", "Donald Williams", "Lisa Gonzalez", "Steven Davis", "Donna Lopez", "Steven Miller", "Jennifer Garcia", "Donna Smith", "Donna Martinez", "Andrew Miller", "Jessica Martinez", "Joseph Garcia", "Mark Martin", "Paul Johnson", "Michael Lopez", "David Johnson", "Steven Martin", "Sarah Jackson", "William Moore", "Lisa Smith", "Donald Hernandez", "Sarah Lopez", "Robert Brown", "Sandra Lopez", "Paul Anderson", "William Brown", "Richard Lopez", "Matthew Garcia", "Patricia Taylor", "Linda Johnson", "Emily Miller", "Joseph Taylor", "John Garcia", "Anthony Lopez", "David Martin", "Emily Jones", "Paul Lopez", "Betty Wilson", "Charles Hernandez", "James Johnson", "Emily Martin", "Michelle Wilson", "Michelle Anderson", "Thomas Smith", "Nancy Thomas", "Emily Johnson", "Anthony Lopez", "Margaret Martinez", "Jessica Jackson", "Barbara Martin", "Barbara Jones", "Charles Davis", "Betty Taylor", "Thomas Taylor", "William Williams", "Thomas Gonzalez", "Mark Moore", "Anthony Garcia", "John Smith", "Mary Martinez", "William Wilson", "Matthew Davis", "Charles Jones", "Barbara Davis", "Andrew Smith", "Matthew Smith", "Mary Martin", "Mary Jones", "Sandra Jackson", "Donald Gonzalez", "John Martin", "James Lopez", "John Garcia", "Margaret Anderson", "Matthew Davis", "Sarah Brown", "Barbara Garcia", "Kimberly Moore", "Margaret Wilson", "Robert Smith", "Jessica Jones", "Barbara Garcia", "Donna Martinez", "Barbara Brown", "Anthony Thomas", "Richard Lopez", "Patricia Moore", "Kimberly Williams", "Jessica Rodriguez", "Michael Garcia", "Charles Jones", "Elizabeth Moore", "Patricia Martinez", "Daniel Williams", "Mary Lopez", "Ashley Taylor", "Michelle Thomas", "Charles Jones", "David Smith", "Nancy Martinez", "Andrew Hernandez", "Lisa Gonzalez", "Andrew Johnson", "Lisa Gonzalez", "Kimberly Johnson", "Richard Hernandez", "Emily Miller", "Patricia Wilson", "Richard Gonzalez", "Paul Miller", "Karen Anderson", "Barbara Gonzalez", "Thomas Anderson", "Emily Hernandez", "Paul Brown", "Daniel Martin", "David Rodriguez", "Andrew Martinez", "James Davis", "Daniel Martinez", "Nancy Smith", "Mary Martinez", "Christopher Gonzalez", "Sandra Johnson", "Charles Thomas", "Charles Hernandez", "Andrew Davis", "Barbara Taylor", "Charles Rodriguez", "Patricia Moore", "Mary Anderson", "Emily Martinez", "Nancy Brown", "Mary Wilson", "Andrew Johnson", "Richard Hernandez", "Emily Jones", "Anthony Johnson", "Joshua Jones", "Sarah Miller", "William Thomas", "Joshua Brown", "David Martinez", "Jessica Martin", "Paul Gonzalez", "Joshua Johnson", "Anthony Anderson", "Jessica Martin", "Lisa Martinez", "Nancy Anderson", "Christopher Hernandez", "James Brown", "David Brown", "Joshua Taylor", "James Smith", "Mark Brown", "Joshua Hernandez", "Ashley Miller", "Linda Johnson", "Mark Martin", "Patricia Miller", "Robert Smith", "Susan Taylor", "Daniel Jackson", "Joseph Lopez", "Steven Jones", "Susan Johnson", "Elizabeth Williams", "Lisa Martin", "Sarah Anderson", "Daniel Garcia", "Barbara Johnson", "Jessica Williams", "Joseph Davis", "Elizabeth Gonzalez", "Karen Rodriguez", "Patricia Smith", "Mary Rodriguez", "Karen Jones", "Jennifer Lopez", "James Jackson", "Mark Brown", "Joshua Moore", "Kimberly Taylor", "James Taylor", "Mark Smith", "Emily Rodriguez", "Thomas Jones", "Michelle Lopez", "Nancy Miller", "Jennifer Brown", "Michael Johnson", "Joseph Hernandez", "Andrew Brown", "Linda Gonzalez", "Patricia Williams", "William Taylor", "Paul Wilson", "Barbara Moore", "Joseph Taylor", "Jennifer Williams", "Charles Smith", "Anthony Taylor", "Jessica Rodriguez", "Linda Davis", "Sandra Jackson", "Anthony Williams", "Susan Johnson", "Sarah Gonzalez", "James Gonzalez", "Anthony Williams", "Margaret Lopez", "Karen Wilson", "Betty Williams", "William Davis", "Sandra Miller", "Sandra Jackson", "Lisa Garcia", "John Martin", "John Jackson", "Lisa Jackson", "Joseph Garcia", "Sarah Martinez", "John Thomas", "James Taylor", "Barbara Garcia", "Andrew Anderson", "Mary Moore", "Susan Moore", "Margaret Hernandez", "Mary Thomas", "Daniel Thomas", "David Rodriguez", "Thomas Taylor", "Christopher Thomas", "Jennifer Davis", "Patricia Gonzalez", "Andrew Thomas", "Matthew Jackson", "Michael Taylor", "Emily Jackson", "Steven Gonzalez", "Mary Garcia", "Margaret Martinez", "Emily Williams", "Barbara Martin", "Betty Taylor", "Michael Miller", "Andrew Gonzalez", "Betty Lopez", "Barbara Wilson", "Joshua Brown", "John Jackson", "Thomas Miller", "Emily Jackson", "Thomas Anderson", "Jessica Smith", "James Smith", "Nancy Brown", "Christopher Smith", "Christopher Jones", "Elizabeth Davis", "Sarah Taylor", "Robert Lopez", "Ashley Garcia", "James Jones", "John Davis", "Paul Martinez", "James Smith", "Christopher Davis", "William Johnson", "Charles Smith", "Christopher Thomas", "Karen Rodriguez", "Jessica Martinez", "Richard Martin", "Barbara Wilson", "Anthony Rodriguez", "Karen Smith", "Betty Rodriguez", "Andrew Wilson", "Linda Johnson", "Mark Rodriguez", "Betty Williams", "Joseph Lopez", "Steven Johnson", "Linda Moore", "Matthew Thomas", "Michelle Williams", "Anthony Garcia", "Christopher Brown", "Emily Hernandez", "John Smith", "Sandra Thomas", "Daniel Smith", "Steven Miller", "Ashley Hernandez", "Barbara Hernandez", "Michael Thomas", "Joseph Anderson", "Michael Brown", "Linda Jones", "Sarah Moore", "Robert Gonzalez", "Steven Miller", "Susan Miller", "Anthony Martin", "Sandra Johnson", "Karen Jackson", "Jennifer Brown", "Donna Williams", "Lisa Garcia", "Donald Gonzalez", "Barbara Martinez", "Betty Hernandez", "Karen Smith", "Margaret Rodriguez", "Robert Rodriguez", "William Martinez", "Matthew Johnson", "Sarah Gonzalez", "Nancy Martinez", "Mark Brown", "Richard Gonzalez", "Anthony Williams", "Matthew Brown", "Thomas Gonzalez", "Paul Davis", "James Lopez", "Lisa Brown", "David Rodriguez", "Nancy Davis", "Jessica Jones", "Sarah Thomas", "Lisa Martinez", "Karen Lopez", "David Miller", "Steven Martinez", "Anthony Moore", "Richard Smith", "Jennifer Lopez", "Elizabeth Garcia", "Matthew Gonzalez", "Andrew Martinez", "Mark Taylor", "Sarah Martinez", "Sarah Thomas", "Joseph Hernandez", "Matthew Martinez", "Richard Brown", "Ashley Johnson", "Lisa Garcia", "Daniel Anderson", "Karen Wilson", "Donna Anderson", "Anthony Taylor", "William Gonzalez", "Ashley Jones", "Paul Martin", "Joshua Williams", "Andrew Moore", "Elizabeth Moore", "David Martin", "Thomas Brown", "Sandra Jones", "Donald Davis", "Patricia Miller", "Robert Thomas", "Emily Miller", "Betty Martinez", "Richard Thomas", "Joshua Smith", "Charles Jones", "Elizabeth Thomas", "Margaret Smith", "Donald Lopez", "Joseph Wilson", "Margaret Garcia", "Jennifer Williams", "Thomas Brown", "Andrew Martinez", "Barbara Williams", "Emily Anderson", "Mary Brown", "Patricia Davis", "Susan Moore", "Thomas Johnson", "Charles Martinez", "James Garcia", "Steven Martin", "Margaret Rodriguez", "Linda Smith", "Emily Jones", "Margaret Martinez", "Donald Moore", "Joshua Johnson", "Karen Jackson", "Kimberly Williams", "Steven Martin", "Thomas Thomas", "Betty Martinez", "Margaret Martin", "Donald Jackson", "Barbara Martinez", "Margaret Martin", "David Martinez", "David Jones", "Steven Brown", "Donald Taylor", "Mark Garcia", "David Thomas", "Andrew Anderson", "William Smith", "Joshua Davis", "Lisa Miller", "Michael Brown"
+  ];
+
+  const banksList = ["Opay", "GTBank", "First Bank", "Zenith Bank", "Access Bank", "UBA", "Kuda Bank", "Moniepoint", "Palmpay", "Stanbic IBTC"];
+  const actionsList = [
+    { type: "withdraw", format: (name, amount, bank) => `${name} just withdrew ₦${amount} to ${bank}.` },
+    { type: "credit", format: (name, amount, bank) => `${name} credited ₦${amount} to ${bank}.` },
+    { type: "upgrade", format: (name, amount) => `${name} upgraded her account for ₦${amount}.` },
+    { type: "transfer", format: (name, amount, bank) => `${name} transferred ₦${amount} to ${bank}.` },
+    { type: "bills", format: (name, amount) => `${name} paid ₦${amount} for Electricity.` },
+    { type: "airtime", format: (name, amount) => `${name} purchased ₦${amount} Airtime.` }
+  ];
+
+  useEffect(() => {
+    const generateRandomNotification = () => {
+      const fullName = exactNamesList[Math.floor(Math.random() * exactNamesList.length)];
+      const action = actionsList[Math.floor(Math.random() * actionsList.length)];
+      
+      let amountNum = Math.floor(Math.random() * 950000) + 5000;
+      if (action.type === 'upgrade') amountNum = 11000;
+      if (action.type === 'airtime') amountNum = Math.floor(Math.random() * 8000) + 1000;
+      
+      const formattedAmount = amountNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const bank = banksList[Math.floor(Math.random() * banksList.length)];
+      const message = action.format(fullName, formattedAmount, bank);
+
+      setCurrentNotification({
+        name: fullName,
+        message: message,
+        amount: `₦${formattedAmount}`,
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${fullName}`
+      });
+
+      setShowNotification(true);
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 5000);
+    };
+
+    const interval = setInterval(() => {
+      generateRandomNotification();
+    }, Math.floor(Math.random() * 7000) + 8000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePic(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const navigateTo = (screen) => {
+    window.scrollTo(0, 0);
+    if (!isLoggedIn && screen !== 'home' && screen !== 'register') {
+      setCurrentScreen('register');
+      return;
+    }
+    setCurrentScreen(screen);
+  };
+
+  useEffect(() => {
+    let timer;
+    if (withdrawStep === 'checking' && countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    } else if (withdrawStep === 'checking' && countdown === 0) {
+      setWithdrawStep('limit_reached');
+    }
+    return () => clearTimeout(timer);
+  }, [withdrawStep, countdown]);
+
+  useEffect(() => {
+    let timer;
+    if (upgradeStep === 'loading' && upgradeCountdown > 0) {
+      timer = setTimeout(() => setUpgradeCountdown(upgradeCountdown - 1), 1000);
+    } else if (upgradeStep === 'loading' && upgradeCountdown === 0) {
+      setUpgradeStep('failed');
+    }
+    return () => clearTimeout(timer);
+  }, [upgradeStep, upgradeCountdown]);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-slate-100 flex flex-col font-sans antialiased selection:bg-emerald-500 selection:text-white pb-24 relative overflow-x-hidden">
+      
+      {/* Celebration Popup Overlay */}
+      {showCelebration && (
+        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-gradient-to-b from-indigo-950 to-slate-900 border border-emerald-500/40 rounded-3xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl relative overflow-hidden text-slate-100">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/20 rounded-full blur-2xl"></div>
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl"></div>
+            
+            <div className="w-16 h-16 bg-emerald-500/20 border border-emerald-500/40 rounded-2xl flex items-center justify-center mx-auto text-emerald-400 text-3xl animate-bounce">
+              🎈🚀
+            </div>
+            
+            <div className="space-y-1">
+              <h3 className="text-2xl font-black text-white">Welcome, {formData.fullName || formData.username || 'Valued User'}! 🎉</h3>
+              <p className="text-xs text-slate-300">Your Cash Pay Wallet account has been successfully created. Enjoy seamless banking & high rewards!</p>
+            </div>
+
+            <button onClick={() => { setShowCelebration(false); navigateTo('dashboard'); }} className="w-full bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-600 hover:to-teal-500 text-slate-950 font-black py-3 rounded-xl shadow-lg transition transform active:scale-95">
+              Go to Dashboard
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Top Header */}
+      <header className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-md border-b border-indigo-900/50 px-4 py-3 flex items-center justify-between shadow-md">
+        <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigateTo('home')}>
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-400 to-teal-300 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-emerald-500/20">₦</div>
+          <span className="font-extrabold text-lg bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300 bg-clip-text text-transparent">Cash Pay Wallet</span>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          {isLoggedIn ? (
+            <>
+              <button onClick={() => alert('Settings & Theme Options')} className="p-2 rounded-xl bg-indigo-900/40 text-indigo-300 hover:text-white border border-indigo-700/40 transition">
+                <Settings className="w-4 h-4" />
+              </button>
+              <button onClick={() => alert('Customer Support Help Line: 24/7 Available')} className="p-2 rounded-xl bg-indigo-900/40 text-indigo-300 hover:text-white border border-indigo-700/40 transition">
+                <HelpCircle className="w-4 h-4" />
+              </button>
+              <div onClick={() => navigateTo('profile')} className="flex items-center space-x-2 bg-indigo-900/60 border border-indigo-700/60 px-2.5 py-1.5 rounded-full cursor-pointer hover:bg-indigo-900 transition">
+                {profilePic ? (
+                  <img src={profilePic} alt="Avatar" className="w-6 h-6 rounded-full object-cover border border-emerald-400" />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-emerald-500 text-slate-950 font-bold flex items-center justify-center text-xs">
+                    {(formData.username || 'U').substring(0,1).toUpperCase()}
+                  </div>
+                )}
+                <span className="text-xs font-bold text-white max-w-[80px] truncate">@{formData.username || 'user'}</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <button onClick={() => navigateTo('register')} className="text-sm font-medium text-slate-300 hover:text-white px-3 py-1.5 transition">Sign In</button>
+              <button onClick={() => navigateTo('register')} className="text-sm font-bold bg-emerald-500 hover:bg-emerald-600 text-slate-950 px-4 py-1.5 rounded-full shadow-md shadow-emerald-500/20 transition">Get Started</button>
+            </>
+          )}
+        </div>
+      </header>
+
+      {/* Main Content Viewport */}
+      <main className="flex-1 max-w-md w-full mx-auto p-4 flex flex-col justify-between">
+        
+        {/* ================= 1. HOME SCREEN ================= */}
+        {currentScreen === 'home' && (
+          <div className="space-y-6 animate-fadeIn">
+            <div className="text-center py-6 space-y-3">
+              <span className="inline-block bg-indigo-500/20 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full border border-indigo-500/30 shadow">
+                Smart Payments. Smarter Living.
+              </span>
+              <h1 className="text-3xl font-black tracking-tight leading-tight text-white">
+                Modern Digital Banking & Rewards Platform
+              </h1>
+              <p className="text-slate-300 text-sm max-w-xs mx-auto font-medium">
+                Cash Pay Wallet is designed to help users send money, manage transactions, pay bills, and access financial services with ease.
+              </p>
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button onClick={() => navigateTo('register')} className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-6 py-3 rounded-2xl shadow-xl shadow-emerald-500/25 transition">
+                  Create Free Account
+                </button>
+                <button onClick={() => navigateTo('register')} className="w-full sm:w-auto bg-indigo-900/50 hover:bg-indigo-900 text-indigo-200 font-bold px-6 py-3 rounded-2xl border border-indigo-700/50 transition">
+                  Sign In
+                </button>
+              </div>
+            </div>
+
+            {/* Icons Bar */}
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="bg-indigo-950/40 p-3 rounded-2xl border border-indigo-900/60 flex flex-col items-center justify-center space-y-1 shadow">
+                <Shield className="w-5 h-5 text-emerald-400" />
+                <span className="text-xs font-semibold text-slate-200">Secure & Trusted</span>
+              </div>
+              <div className="bg-indigo-950/40 p-3 rounded-2xl border border-indigo-900/60 flex flex-col items-center justify-center space-y-1 shadow">
+                <Award className="w-5 h-5 text-amber-400" />
+                <span className="text-xs font-semibold text-slate-200">₦500 Bonus</span>
+              </div>
+              <div className="bg-indigo-950/40 p-3 rounded-2xl border border-indigo-900/60 flex flex-col items-center justify-center space-y-1 shadow">
+                <RefreshCw className="w-5 h-5 text-teal-400" />
+                <span className="text-xs font-semibold text-slate-200">Instant Withdraw</span>
+              </div>
+            </div>
+
+            {/* Why Choose Section */}
+            <div className="bg-indigo-950/30 border border-indigo-900/50 rounded-3xl p-5 space-y-4 shadow-xl">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow">
+                  <Shield className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-white">Why Choose Cash Pay Wallet?</h3>
+              </div>
+              <div className="space-y-2.5 text-sm text-slate-200">
+                <div className="flex items-center space-x-2"><CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" /><span>Fund your wallet & complete tasks</span></div>
+                <div className="flex items-center space-x-2"><CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" /><span>Activate premium plans & earn rewards</span></div>
+                <div className="flex items-center space-x-2"><CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" /><span>Track accounts in real time with support</span></div>
+              </div>
+            </div>
+
+            {/* Learn and Earn Banner */}
+            <div className="bg-gradient-to-r from-teal-600 via-emerald-600 to-indigo-600 rounded-3xl p-5 text-slate-950 relative overflow-hidden shadow-2xl">
+              <div className="relative z-10 space-y-3">
+                <span className="bg-slate-950/30 text-emerald-300 text-xs font-black px-2.5 py-1 rounded-lg uppercase tracking-wider">Earn & Learn</span>
+                <h4 className="text-xl font-black text-white leading-snug">Learn and Earn at the Same Time with Cash Pay Wallet</h4>
+                <button onClick={() => navigateTo('dashboard')} className="bg-slate-950 text-emerald-400 font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider hover:bg-slate-900 transition shadow-lg">
+                  Get Started Now
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================= 2. REGISTRATION SCREEN ================= */}
+        {currentScreen === 'register' && (
+          <div className="space-y-6 animate-fadeIn py-2 text-slate-100">
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl font-black text-white">Create your account</h2>
+              <p className="text-xs text-slate-300">Join thousands of earners on Cash Pay Wallet</p>
+            </div>
+
+            <div className="flex bg-indigo-950/80 p-1 rounded-2xl border border-indigo-900/80 shadow">
+              <button onClick={() => setAuthTab('signin')} className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition ${authTab === 'signin' ? 'bg-indigo-900 text-white shadow-lg' : 'text-slate-400'}`}>Sign in</button>
+              <button onClick={() => setAuthTab('signup')} className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition ${authTab === 'signup' ? 'bg-indigo-900 text-white shadow-lg' : 'text-slate-400'}`}>Sign up</button>
+            </div>
+
+            <form onSubmit={(e) => { 
+              e.preventDefault(); 
+              setIsLoggedIn(true);
+              setShowCelebration(true);
+            }} className="space-y-3.5 bg-indigo-950/40 border border-indigo-900/60 p-5 rounded-3xl shadow-xl">
+              {authTab === 'signup' && (
+                <>
+                  <div className="flex flex-col items-center justify-center space-y-2 pb-2">
+                    <div className="w-20 h-20 rounded-full bg-indigo-900/60 border-2 border-dashed border-emerald-500/50 flex items-center justify-center overflow-hidden relative group cursor-pointer shadow-inner">
+                      {profilePic ? (
+                        <img src={profilePic} alt="Profile" className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="w-8 h-8 text-indigo-300" />
+                      )}
+                      <input type="file" accept="image/*" onChange={handleImageUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                    </div>
+                    <span className="text-[11px] text-emerald-400 font-bold">Tap to upload your picture</span>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Full name</label>
+                    <input type="text" required placeholder="Enter full name" value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} className="w-full bg-indigo-950/80 border border-indigo-900 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 shadow-inner" />
+                  </div>
+                </>
+              )}
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Username</label>
+                <input type="text" required placeholder="Choose username" value={formData.username} onChange={(e) => setFormData({...formData, username: e.target.value})} className="w-full bg-indigo-950/80 border border-indigo-900 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 shadow-inner" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Email</label>
+                <input type="email" required placeholder="you@example.com" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-indigo-950/80 border border-indigo-900 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 shadow-inner" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Password</label>
+                <div className="relative">
+                  <input type={showPassword ? "text" : "password"} required placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full bg-indigo-950/80 border border-indigo-900 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 shadow-inner" />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-3.5 text-slate-400 hover:text-white">
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+              {authTab === 'signup' && (
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Confirm password</label>
+                  <input type="password" required placeholder="••••••••" value={formData.confirmPassword} onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})} className="w-full bg-indigo-950/80 border border-indigo-900 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 shadow-inner" />
+                </div>
+              )}
+              <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3.5 rounded-2xl shadow-xl shadow-emerald-500/25 transition mt-2">
+                {authTab === 'signup' ? 'Create account' : 'Sign in'}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* ================= 3. WALLET DASHBOARD ================= */}
+        {currentScreen === 'dashboard' && (
+          <div className="space-y-5 animate-fadeIn relative">
+            
+            {/* Floating Live Activity Pop-Up Notification Card - Placed properly in front */}
+            {showNotification && currentNotification && (
+              <div className="sticky top-2 z-50 mb-3 w-full animate-bounce duration-300 flex justify-center">
+                <div className="bg-slate-900 text-slate-100 rounded-[22px] p-3.5 shadow-2xl border border-indigo-500/40 flex items-center space-x-3 w-full max-w-sm">
+                  <div className="relative shrink-0">
+                    <img src={currentNotification.avatar} alt="User" className="w-11 h-11 rounded-full bg-indigo-950 object-cover border border-indigo-500/50" />
+                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-900 animate-pulse"></div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-xs text-white truncate">{currentNotification.name}</h4>
+                    <p className="text-[11px] text-slate-300 truncate">{currentNotification.message}</p>
+                    <span className="text-xs font-black text-blue-400">{currentNotification.amount}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Wallet Balance Card */}
+            <div className="bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-950 border border-indigo-800/50 rounded-3xl p-5 space-y-4 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-36 h-36 bg-emerald-500/10 rounded-full blur-2xl"></div>
+              
+              <div className="flex justify-between items-start relative z-10">
+                <div>
+                  <span className="text-xs text-slate-300 font-semibold flex items-center space-x-2">
+                    <span>Wallet Balance</span>
+                    <button onClick={() => setHideBalance(!hideBalance)} className="text-indigo-300 hover:text-white">
+                      {hideBalance ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                    </button>
+                  </span>
+                  <div className="text-3xl font-black text-white mt-1">
+                    {hideBalance ? '₦••••••••' : `₦${balance.toLocaleString()}`}
+                  </div>
+                </div>
+                <span className="bg-emerald-500/20 text-emerald-300 text-xs px-3 py-1 rounded-full font-bold border border-emerald-500/30">Active</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-2 relative z-10">
+                <button onClick={() => navigateTo('withdraw')} className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-2xl text-sm shadow-lg shadow-emerald-500/20 transition flex items-center justify-center space-x-1.5">
+                  <ArrowUpRight className="w-4 h-4" /><span>Withdraw</span>
+                </button>
+                <button onClick={() => { setUpgradeAmount(11000); navigateTo('upgrade'); }} className="bg-indigo-900/80 hover:bg-indigo-900 text-white font-bold py-3 rounded-2xl text-sm transition flex items-center justify-center space-x-1.5 border border-indigo-700/60 shadow">
+                  <Award className="w-4 h-4 text-amber-400" /><span>Upgrade</span>
+                </button>
+              </div>
+
+              {/* Large Blue Gradient Upgrade Wallet Button */}
+              <button onClick={() => { setUpgradeAmount(11000); navigateTo('upgrade'); }} className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:opacity-95 text-white font-black py-3.5 rounded-2xl shadow-xl shadow-blue-600/30 transition flex items-center justify-center space-x-2 relative z-10">
+                <Sparkles className="w-4 h-4 text-amber-300" />
+                <span>UPGRADE WALLET NOW</span>
+              </button>
+            </div>
+
+            {/* Quick Actions Grid */}
+            <div className="bg-indigo-950/40 border border-indigo-900/60 rounded-3xl p-4 shadow-xl space-y-3">
+              <h4 className="text-xs font-black text-emerald-400 uppercase tracking-wider">Quick Actions</h4>
+              <div className="grid grid-cols-4 gap-2.5">
+                {[
+                  { name: 'Upgrade', icon: Award, action: () => { setUpgradeAmount(11000); navigateTo('upgrade'); }, color: 'text-amber-400 bg-amber-500/10' },
+                  { name: 'Transfer', icon: SendHorizontal, action: () => navigateTo('withdraw'), color: 'text-emerald-400 bg-emerald-500/10' },
+                  { name: 'Airtime', icon: PhoneCall, action: () => { setUpgradeAmount(2000); navigateTo('upgrade'); }, color: 'text-blue-400 bg-blue-500/10' },
+                  { name: 'Data', icon: Wifi, action: () => { setUpgradeAmount(3000); navigateTo('upgrade'); }, color: 'text-teal-400 bg-teal-500/10' },
+                  { name: 'Pay Bills', icon: Receipt, action: () => { setUpgradeAmount(5000); navigateTo('upgrade'); }, color: 'text-purple-400 bg-purple-500/10' },
+                  { name: 'Betting', icon: Dices, action: () => { setUpgradeAmount(5000); navigateTo('upgrade'); }, color: 'text-orange-400 bg-orange-500/10' },
+                  { name: 'Electricity', icon: Zap, action: () => { setUpgradeAmount(10000); navigateTo('upgrade'); }, color: 'text-yellow-400 bg-yellow-500/10' },
+                  { name: 'Cable TV', icon: Tv, action: () => { setUpgradeAmount(7500); navigateTo('upgrade'); }, color: 'text-pink-400 bg-pink-500/10' },
+                ].map((act, idx) => {
+                  const Icon = act.icon;
+                  return (
+                    <button key={idx} onClick={act.action} className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-indigo-950/60 hover:bg-indigo-900/80 border border-indigo-900/50 transition group">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-1.5 shadow-sm group-hover:scale-105 transition ${act.color}`}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <span className="text-[11px] font-bold text-slate-200">{act.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Start Today Banner */}
+            <div className="bg-gradient-to-r from-teal-600 to-emerald-600 rounded-3xl p-4 text-center text-slate-950 font-black shadow-xl">
+              <div className="text-[10px] tracking-wider uppercase text-slate-950/80 mb-0.5">Announcement</div>
+              <div className="text-lg text-white">START TODAY. EARN TOMORROW.</div>
+            </div>
+
+            {/* Why Choose Cash Pay Wallet Banner & Info */}
+            <div className="bg-indigo-950/30 border border-indigo-900/60 rounded-3xl p-4 space-y-3 shadow-xl">
+              <h4 className="font-black text-xs text-emerald-400 uppercase tracking-wider">WHY CHOOSE Cash Pay Wallet</h4>
+              <div className="space-y-2 text-xs text-slate-200 font-medium">
+                <div className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-emerald-400" /><span>100% Legit & Secure: Your safety is our top priority</span></div>
+                <div className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-emerald-400" /><span>Easy to Use: User-friendly platform for everyone</span></div>
+                <div className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-emerald-400" /><span>Real Cash withdrawal: upgrade and withdraw easily</span></div>
+                <div className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-emerald-400" /><span>Learn & Grow: Gain valuable skills while earning</span></div>
+                <div className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-emerald-400" /><span>24/7 Support: We’re here to help</span></div>
+              </div>
+            </div>
+
+            {/* Recent Transactions */}
+            <div className="bg-indigo-950/20 border border-indigo-900/50 rounded-3xl p-4 space-y-2 shadow">
+              <h4 className="font-bold text-xs text-slate-400 uppercase tracking-wider">Recent transactions</h4>
+              <p className="text-xs text-slate-500 italic py-2 text-center">No transactions yet</p>
+            </div>
+          </div>
+        )}
+
+        {/* ================= 4. WITHDRAW SCREEN / FLOW ================= */}
+        {currentScreen === 'withdraw' && (
+          <div className="space-y-5 animate-fadeIn">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold">Withdraw</h2>
+              <div className="text-xs bg-indigo-950 px-3 py-1 rounded-full text-emerald-300 border border-indigo-800">
+                Balance: ₦{balance.toLocaleString()}
+              </div>
+            </div>
+
+            {withdrawStep === 'form' && (
+              <div className="space-y-4">
+                <div className="bg-indigo-950/40 border border-indigo-900/60 rounded-3xl p-4 space-y-3 shadow-xl">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Recipient Name</label>
+                    <input type="text" value={withdrawData.name} onChange={(e) => setWithdrawData({...withdrawData, name: e.target.value})} className="w-full bg-indigo-950/60 border border-indigo-900 rounded-2xl px-3 py-2.5 text-sm text-white shadow-inner" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Account Number (10 digits)</label>
+                    <input type="text" maxLength="10" placeholder="0123456789" value={withdrawData.number} onChange={(e) => setWithdrawData({...withdrawData, number: e.target.value})} className="w-full bg-indigo-950/60 border border-indigo-900 rounded-2xl px-3 py-2.5 text-sm text-white shadow-inner" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Select Bank (All Nigerian Banks)</label>
+                    <select value={withdrawData.bank} onChange={(e) => setWithdrawData({...withdrawData, bank: e.target.value})} className="w-full bg-indigo-950/60 border border-indigo-900 rounded-2xl px-3 py-2.5 text-sm text-white shadow-inner">
+                      <option>Access Bank</option>
+                      <option>Citibank Nigeria</option>
+                      <option>Ecobank Nigeria</option>
+                      <option>Fidelity Bank</option>
+                      <option>First Bank of Nigeria</option>
+                      <option>First City Monument Bank (FCMB)</option>
+                      <option>Globus Bank</option>
+                      <option>Guaranty Trust Bank (GTBank)</option>
+                      <option>Heritage Bank</option>
+                      <option>Jaiz Bank</option>
+                      <option>Keystone Bank</option>
+                      <option>Lotus Bank</option>
+                      <option>Parallex Bank</option>
+                      <option>Polaris Bank</option>
+                      <option>Providus Bank</option>
+                      <option>Stanbic IBTC Bank</option>
+                      <option>Standard Chartered Bank</option>
+                      <option>Sterling Bank</option>
+                      <option>SunTrust Bank</option>
+                      <option>Union Bank of Nigeria</option>
+                      <option>United Bank for Africa (UBA)</option>
+                      <option>Unity Bank</option>
+                      <option>Wema Bank</option>
+                      <option>Zenith Bank</option>
+                      <option>Opay Digital Services</option>
+                      <option>PalmPay</option>
+                      <option>Kuda Bank</option>
+                      <option>Moniepoint MFB</option>
+                      <option>FairMoney Microfinance Bank LTD</option>
+                      <option>Paga</option>
+                      <option>VFD Microfinance Bank</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Amount (₦)</label>
+                    <input type="number" placeholder="5000" value={withdrawData.amount} onChange={(e) => setWithdrawData({...withdrawData, amount: e.target.value})} className="w-full bg-indigo-950/60 border border-indigo-900 rounded-2xl px-3 py-2.5 text-sm text-white shadow-inner" />
+                  </div>
+                </div>
+
+                <button onClick={() => {
+                  if(withdrawData.number.length === 10 && withdrawData.amount) {
+                    setWithdrawStep('checking');
+                    setCountdown(5);
+                  } else {
+                    alert('Please enter valid account number and amount');
+                  }
+                }} className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3.5 rounded-2xl shadow-xl transition">
+                  Continue Withdrawal
+                </button>
+              </div>
+            )}
+
+            {withdrawStep === 'checking' && (
+              <div className="bg-indigo-950/40 border border-indigo-900/60 rounded-3xl p-8 text-center space-y-4 shadow-xl">
+                <div className="w-12 h-12 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin mx-auto"></div>
+                <div className="text-sm font-bold text-white">Checking account details...</div>
+                <div className="text-xs text-slate-300">Automatically retrieving account holder's name ({countdown}s)...</div>
+              </div>
+            )}
+
+            {withdrawStep === 'limit_reached' && (
+              <div className="bg-gradient-to-br from-indigo-950 to-slate-900 border border-indigo-500/30 rounded-3xl p-5 space-y-4 shadow-2xl animate-fadeIn">
+                <div className="flex items-center space-x-2 text-indigo-300">
+                  <div className="w-8 h-8 rounded-2xl bg-indigo-500/20 flex items-center justify-center font-bold">🚀</div>
+                  <span className="font-bold text-sm">Withdrawal Notice</span>
+                </div>
+                <p className="text-sm text-slate-200 leading-relaxed bg-indigo-900/20 border border-indigo-500/20 p-4 rounded-2xl">
+                  🚀 Your balance is ₦789,000. Withdrawals unlock at ₦800,000. Upgrade now to enjoy seamless access to your funds. We're excited to serve you!
+                </p>
+                <button onClick={() => { setUpgradeAmount(11000); navigateTo('upgrade'); }} className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3.5 rounded-2xl shadow-xl transition">
+                  Upgrade Now
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= 5. ADD BANK SCREEN ================= */}
+        {currentScreen === 'addBank' && (
+          <div className="space-y-5 animate-fadeIn">
+            <h2 className="text-xl font-bold">Add Bank</h2>
+            <p className="text-xs text-slate-300">Save your withdrawal bank account. You can add or remove banks anytime.</p>
+
+            <div className="bg-indigo-950/40 border border-indigo-900/60 rounded-3xl p-4 space-y-3.5 shadow-xl">
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Account number (10 digits)</label>
+                <input type="text" maxLength="10" placeholder="Enter 10-digit number" value={newBank.accountNumber} onChange={(e) => setNewBank({...newBank, accountNumber: e.target.value})} className="w-full bg-indigo-950/60 border border-indigo-900 rounded-2xl px-3 py-2 text-sm text-white shadow-inner" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Select bank</label>
+                <select value={newBank.bankName} onChange={(e) => setNewBank({...newBank, bankName: e.target.value})} className="w-full bg-indigo-950/60 border border-indigo-900 rounded-2xl px-3 py-2 text-sm text-white shadow-inner">
+                  <option>Access Bank</option>
+                  <option>GTBank</option>
+                  <option>First Bank</option>
+                  <option>UBA</option>
+                  <option>Zenith Bank</option>
+                  <option>Opay</option>
+                  <option>Palmpay</option>
+                  <option>Kuda Bank</option>
+                  <option>Moniepoint MFB</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Account name</label>
+                <input type="text" placeholder="Retrieved Name" value={newBank.accountName} onChange={(e) => setNewBank({...newBank, accountName: e.target.value})} className="w-full bg-indigo-950/60 border border-indigo-900 rounded-2xl px-3 py-2 text-sm text-white shadow-inner" />
+              </div>
+
+              {bankVerified && (
+                <div className="flex items-center space-x-2 text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-2xl text-xs font-bold">
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Account {newBank.accountName || 'Verified'} ✅</span>
+                </div>
+              )}
+
+              <div className="flex space-x-2 pt-2">
+                <button onClick={() => {
+                  if(newBank.accountNumber.length === 10) {
+                    setIsVerifying(true);
+                    setTimeout(() => {
+                      setIsVerifying(false);
+                      setNewBank({...newBank, accountName: formData.fullName || 'Florence User'});
+                      setBankVerified(true);
+                    }, 1000);
+                  } else {
+                    alert('Enter valid 10 digit account number');
+                  }
+                }} className="flex-1 bg-indigo-900 hover:bg-indigo-800 text-white font-bold py-2.5 rounded-2xl text-xs transition border border-indigo-700 shadow">
+                  {isVerifying ? 'Verifying...' : 'Verify'}
+                </button>
+                <button onClick={() => {
+                  if(bankVerified) {
+                    setBanks([...banks, newBank]);
+                    setBankVerified(false);
+                    setNewBank({ accountNumber: '', bankName: 'Access Bank', accountName: '' });
+                    alert('Bank saved successfully!');
+                  } else {
+                    alert('Please verify account first');
+                  }
+                }} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded-2xl text-xs transition shadow">
+                  Save bank
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-indigo-950/30 border border-indigo-900/50 rounded-3xl p-4 space-y-2 shadow">
+              <h4 className="font-bold text-xs text-slate-300 uppercase tracking-wider">Your banks</h4>
+              {banks.length === 0 ? (
+                <p className="text-xs text-slate-500 py-2">No bank accounts saved yet</p>
+              ) : (
+                banks.map((b, idx) => (
+                  <div key={idx} className="bg-indigo-900/40 p-3 rounded-2xl border border-indigo-800 flex justify-between items-center text-xs shadow">
+                    <div>
+                      <span className="font-bold text-white">{b.bankName}</span> — <span className="text-slate-300">{b.accountNumber}</span>
+                      <span className="block text-slate-400">{b.accountName} · (verified)</span>
+                    </div>
+                    <CheckCircle className="w-4 h-4 text-emerald-400" />
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ================= 6. UPGRADE PAGE ================= */}
+        {currentScreen === 'upgrade' && (
+          <div className="space-y-5 animate-fadeIn">
+            <div className="text-center space-y-1">
+              <span className="bg-amber-500/20 text-amber-300 text-xs font-extrabold px-3 py-1 rounded-full border border-amber-500/30">UPGRADE ACCOUNT</span>
+              <h2 className="text-xl font-black pt-1 text-white">Upgrade your account for premium access.</h2>
+            </div>
+
+            {upgradeStep === 'form' && (
+              <div className="space-y-4">
+                <div className="bg-indigo-950/40 border border-indigo-900/60 rounded-3xl p-4 space-y-3 shadow-xl">
+                  <h4 className="text-xs font-bold text-indigo-300 uppercase tracking-wider">Payment Details</h4>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between bg-indigo-900/40 p-3 rounded-2xl border border-indigo-800/60">
+                      <span className="text-slate-300">Account Name</span>
+                      <span className="font-bold text-white">Florence</span>
+                    </div>
+                    <div className="flex justify-between bg-indigo-900/40 p-3 rounded-2xl border border-indigo-800/60">
+                      <span className="text-slate-300">Account Number</span>
+                      <span className="font-bold text-white flex items-center space-x-1">
+                        <span>2009514394</span>
+                        <button onClick={() => navigator.clipboard.writeText('2009514394')} className="text-emerald-400 hover:text-emerald-300 ml-1"><Copy className="w-3.5 h-3.5" /></button>
+                      </span>
+                    </div>
+                    <div className="flex justify-between bg-indigo-900/40 p-3 rounded-2xl border border-indigo-800/60">
+                      <span className="text-slate-300">Bank</span>
+                      <span className="font-bold text-white">FairMoney Microfinance Bank LTD</span>
+                    </div>
+                    <div className="flex justify-between bg-indigo-900/40 p-3 rounded-2xl border border-indigo-800/60">
+                      <span className="text-slate-300">Amount</span>
+                      <span className="font-black text-emerald-400 text-sm">₦{Number(upgradeAmount).toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Upload Payment Receipt</label>
+                    <div className="border-2 border-dashed border-indigo-700/60 hover:border-emerald-500 rounded-2xl p-6 text-center cursor-pointer transition bg-indigo-950/30">
+                      <Upload className="w-6 h-6 text-slate-400 mx-auto mb-2" />
+                      <span className="text-xs text-slate-200 font-medium">Tap to upload receipt.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button onClick={() => setUpgradeStep('loading')} className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:opacity-90 text-slate-950 font-black py-3.5 rounded-2xl shadow-xl transition">
+                  CONFIRM MY UPGRADE
+                </button>
+              </div>
+            )}
+
+            {upgradeStep === 'loading' && (
+              <div className="bg-indigo-950/40 border border-indigo-900/60 rounded-3xl p-8 text-center space-y-4 shadow-xl">
+                <div className="w-12 h-12 rounded-full border-4 border-amber-500 border-t-transparent animate-spin mx-auto"></div>
+                <div className="text-sm font-bold text-white">Verifying payment with bank gateway...</div>
+                <div className="text-xs text-slate-300">Please wait ({upgradeCountdown}s)...</div>
+              </div>
+            )}
+
+            {upgradeStep === 'failed' && (
+              <div className="bg-gradient-to-br from-indigo-950 to-slate-900 border border-red-500/30 rounded-3xl p-5 space-y-4 shadow-2xl animate-fadeIn">
+                <div className="flex items-center space-x-2 text-red-400">
+                  <X className="w-5 h-5 bg-red-500/20 rounded-full p-1" />
+                  <span className="font-bold text-sm">Payment Status</span>
+                </div>
+                <p className="text-sm text-slate-200 bg-red-950/40 border border-red-500/20 p-4 rounded-2xl">
+                  Payment not received ❌ Please add funds again to continue.
+                </p>
+                <button onClick={() => setUpgradeStep('form')} className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:opacity-90 text-slate-950 font-black py-3.5 rounded-2xl shadow-xl transition">
+                  Go Back to Upgrade Details
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= 7. PROMOTION CENTER ================= */}
+        {currentScreen === 'promotion' && (
+          <div className="space-y-5 animate-fadeIn">
+            <div>
+              <h2 className="text-xl font-bold">Promotion Center</h2>
+              <p className="text-xs text-slate-300">Boost your social pages, channels, and videos.</p>
+            </div>
+
+            <div className="space-y-2.5">
+              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">CHOOSE A PLATFORM:</span>
+              {[
+                { name: 'TikTok', desc: 'Followers, likes, comments, views', screen: 'tiktokPromo', icon: '🎵' },
+                { name: 'Telegram Channel', desc: 'Post views, reactions, members', screen: 'telegramPromo', icon: '✈️' },
+                { name: 'WhatsApp Channel', desc: 'Real valid members', screen: 'telegramPromo', icon: '💬' },
+                { name: 'YouTube', desc: 'Subscribers, views, likes', screen: 'youtubePromo', icon: '▶️' },
+                { name: 'Facebook Page', desc: 'Followers, views, likes, comments', screen: 'tiktokPromo', icon: '👥' },
+                { name: 'Telegram Bot', desc: 'Bot subscribers', screen: 'telegramPromo', icon: '🤖' },
+                { name: 'Other Website', desc: 'Custom promotion request', screen: 'otherPromo', icon: '🌐' }
+              ].map((p, idx) => (
+                <div key={idx} onClick={() => navigateTo(p.screen)} className="bg-indigo-950/40 hover:bg-indigo-950/80 border border-indigo-900/60 hover:border-indigo-700 p-3.5 rounded-2xl flex items-center justify-between cursor-pointer transition shadow">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-lg">{p.icon}</span>
+                    <div>
+                      <h4 className="font-bold text-sm text-white">{p.name}</h4>
+                      <p className="text-xs text-slate-300">{p.desc}</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Specific Promos */}
+        {(currentScreen === 'tiktokPromo' || currentScreen === 'youtubePromo' || currentScreen === 'telegramPromo' || currentScreen === 'otherPromo') && (
+          <div className="space-y-5 animate-fadeIn">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold capitalize">{currentScreen.replace('Promo', '')} Promotion</h2>
+              <button onClick={() => navigateTo('promotion')} className="text-xs text-emerald-400 hover:underline">Back</button>
+            </div>
+
+            <div className="bg-indigo-950/40 border border-indigo-900/60 rounded-3xl p-4 space-y-4 shadow-xl">
+              {currentScreen === 'tiktokPromo' && (
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Select Package Option</label>
+                  <select value={promoOption} onChange={(e) => setPromoOption(e.target.value)} className="w-full bg-indigo-950/60 border border-indigo-900 rounded-2xl px-3 py-2.5 text-sm text-white shadow-inner mb-3">
+                    <option value="followers">Followers: 30 / ₦1,000</option>
+                    <option value="likes">Likes: 100 / ₦1,000</option>
+                    <option value="comments">Comments: 50 / ₦1,000</option>
+                    <option value="views">Views: 200 / ₦1,000</option>
+                  </select>
+                </div>
+              )}
+
+              {currentScreen === 'youtubePromo' && (
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Select Package Option</label>
+                  <select value={promoOption} onChange={(e) => setPromoOption(e.target.value)} className="w-full bg-indigo-950/60 border border-indigo-900 rounded-2xl px-3 py-2.5 text-sm text-white shadow-inner mb-3">
+                    <option value="subscribers">Subscribers: 40 / ₦1,000</option>
+                    <option value="views">Video views: 100 / ₦1,000</option>
+                    <option value="likes">Video likes: 60 / ₦1,000</option>
+                  </select>
+                </div>
+              )}
+
+              {currentScreen === 'otherPromo' && (
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">What do you want promoted?</label>
+                  <input type="text" placeholder="e.g. Website traffic, app installs" value={otherPromoDesc} onChange={(e) => setOtherPromoDesc(e.target.value)} className="w-full bg-indigo-950/60 border border-indigo-900 rounded-2xl px-3 py-2.5 text-sm text-white shadow-inner mb-3" />
+                </div>
+              )}
+
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Enter URL / link</label>
+                <input type="url" placeholder="https://..." value={promoUrl} onChange={(e) => setPromoUrl(e.target.value)} className="w-full bg-indigo-950/60 border border-indigo-900 rounded-2xl px-3 py-2.5 text-sm text-white shadow-inner" />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Amount (₦) Minimum ₦1,000</label>
+                <input type="number" min="1000" value={promoAmount} onChange={(e) => setPromoAmount(e.target.value)} className="w-full bg-indigo-950/60 border border-indigo-900 rounded-2xl px-3 py-2.5 text-sm text-white shadow-inner" />
+              </div>
+
+              <button onClick={() => {
+                if(promoUrl && promoAmount >= 1000) {
+                  setUpgradeAmount(promoAmount);
+                  navigateTo('upgrade');
+                } else {
+                  alert('Please enter a valid URL and minimum amount of ₦1,000');
+                }
+              }} className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3.5 rounded-2xl shadow-xl transition">
+                Proceed to Payment & Upgrade
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ================= 8. PROFILE MENU ================= */}
+        {currentScreen === 'profile' && (
+          <div className="space-y-5 animate-fadeIn">
+            <div className="flex items-center space-x-3 bg-indigo-950/40 p-4 rounded-3xl border border-indigo-900/60 shadow-xl">
+              {profilePic ? (
+                <img src={profilePic} alt="Profile" className="w-14 h-14 rounded-2xl object-cover border border-emerald-400" />
+              ) : (
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-400 to-teal-400 flex items-center text-slate-950 font-black justify-center text-xl shadow">
+                  {formData.username ? formData.username.substring(0,2).toUpperCase() : 'CP'}
+                </div>
+              )}
+              <div>
+                <h3 className="font-bold text-base text-white">{formData.fullName || 'Cash Pay User'}</h3>
+                <p className="text-xs text-slate-300">{formData.email || 'user@example.com'}</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {[
+                { title: 'Get App', desc: 'Install Cash Pay Wallet on your device', icon: Smartphone, action: () => alert('App download triggered!') },
+                { title: 'Profile Information', desc: 'Your registration details & password', icon: User, action: () => alert('Profile details view') },
+                { title: 'About Cash Pay Wallet', desc: 'How the app works & FAQ', icon: Shield, action: () => alert('Cash Pay Wallet is a modern financial platform...') },
+                { title: 'Add Bank', desc: 'Manage your withdrawal bank accounts', icon: Wallet, action: () => navigateTo('addBank') },
+                { title: 'Log out', desc: 'Sign out of your Cash Pay Wallet account', icon: Lock, action: () => { setIsLoggedIn(false); navigateTo('home'); }, danger: true },
+              ].map((item, idx) => {
+                const IconComponent = item.icon;
+                return (
+                  <div key={idx} onClick={item.action} className={`bg-indigo-950/40 hover:bg-indigo-950/80 border border-indigo-900/60 hover:border-indigo-700 p-3.5 rounded-2xl flex items-center justify-between cursor-pointer transition shadow ${item.danger ? 'text-red-400' : 'text-white'}`}>
+                    <div className="flex items-center space-x-3">
+                      <div className={`p-2.5 rounded-xl ${item.danger ? 'bg-red-500/20 text-red-400' : 'bg-indigo-900/60 text-emerald-400 shadow'}`}>
+                        <IconComponent className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-sm">{item.title}</h4>
+                        <p className="text-xs text-slate-300">{item.desc}</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400" />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+      </main>
+
+      {/* Bottom Navigation Bar */}
+      {isLoggedIn && currentScreen !== 'home' && currentScreen !== 'register' && (
+        <nav className="fixed bottom-0 left-0 right-0 bg-slate-950/90 backdrop-blur-md border-t border-indigo-900/60 py-3 px-6 flex justify-around items-center z-40 shadow-2xl">
+          <button onClick={() => navigateTo('dashboard')} className={`flex flex-col items-center space-y-1 transition ${currentScreen === 'dashboard' ? 'text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}>
+            <Home className="w-5 h-5" />
+            <span className="text-[10px] font-bold">Home</span>
+          </button>
+          <button onClick={() => navigateTo('promotion')} className={`flex flex-col items-center space-y-1 transition ${currentScreen === 'promotion' || currentScreen.includes('Promo') ? 'text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}>
+            <Layers className="w-5 h-5" />
+            <span className="text-[10px] font-bold">Ads</span>
+          </button>
+          <button onClick={() => navigateTo('profile')} className={`flex flex-col items-center space-y-1 transition ${currentScreen === 'profile' ? 'text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}>
+            <User className="w-5 h-5" />
+            <span className="text-[10px] font-bold">Profile</span>
+          </button>
+        </nav>
+      )}
+    </div>
+  );
+}
